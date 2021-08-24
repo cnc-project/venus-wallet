@@ -137,12 +137,12 @@ var walletNew = &cli.Command{
 		if err != nil {
 			return err
 		}
-		// TODO 生成助记符 如果有密码 则加上密码
+		// TODO: Generate mnemonic, if there is a password, add the password
 		// gen mnemonic
 		// seed
 		ctx := helper.ReqContext(cctx)
 		defer closer()
-		pwd := cctx.String("msg-type")
+		pwd := cctx.String("password")
 		nk, err := api.WalletNew(ctx, t, pwd)
 		if err != nil {
 			return err
