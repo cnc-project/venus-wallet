@@ -67,26 +67,26 @@ func NewKeyFromKeyInfo(ki *core.KeyInfo) (PrivateKey, error) {
 	case core.KTSecp256k1:
 		return newSecpKeyFromData(ki.PrivateKey), nil
 	case core.KTCBLS:
-		return newChiaBlsKeyFromData(ki.PrivateKey,ki.Mnemonic), nil
+		return newChiaBlsKeyFromData(ki.PrivateKey, ki.Mnemonic), nil
 	default:
 		return nil, fmt.Errorf("invalid key type: %s", ki.Type)
 	}
 }
 
-func NewKeyFromData2(kt core.KeyType, prv []byte,mnemonicBytes []byte) (PrivateKey, error) {
+func NewKeyFromData2(kt core.KeyType, prv []byte, mnemonicBytes []byte) (PrivateKey, error) {
 	switch kt {
 	case core.KTBLS:
 		return newBlsKeyFromData(prv)
 	case core.KTSecp256k1:
 		return newSecpKeyFromData(prv), nil
 	case core.KTCBLS:
-		return newChiaBlsKeyFromData(prv,string(mnemonicBytes)), nil
+		return newChiaBlsKeyFromData(prv, string(mnemonicBytes)), nil
 	default:
 		return nil, fmt.Errorf("invalid key type: %s", kt)
 	}
 }
 
-func NewKeyFromData(st core.SigType, prv []byte) (PrivateKey, error) {
+func NewKeyFromData(st core.SigType, prv []byte, mnemonicBytes []byte) (PrivateKey, error) {
 	switch st {
 	case core.SigTypeSecp256k1:
 		return newSecpKeyFromData(prv), nil
@@ -94,7 +94,7 @@ func NewKeyFromData(st core.SigType, prv []byte) (PrivateKey, error) {
 		return newBlsKeyFromData(prv)
 	case core.SigTypeChiaBLS:
 		// TODO：need mnemonic
-		return newChiaBlsKeyFromData(prv,""), nil
+		return newChiaBlsKeyFromData(prv, string(mnemonicBytes)), nil
 	default:
 		return nil, fmt.Errorf("invalid signature type: %d", st)
 	}

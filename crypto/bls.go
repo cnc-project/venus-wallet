@@ -3,6 +3,7 @@ package crypto
 import (
 	"crypto/rand"
 	"fmt"
+
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/venus-wallet/core"
 	blst "github.com/supranational/blst/bindings/go"

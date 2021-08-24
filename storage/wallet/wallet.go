@@ -130,7 +130,7 @@ func (w *wallet) WalletNew(ctx context.Context, kt core.KeyType, password string
 	// notify
 	w.bus.Publish("wallet:add_address", addr)
 	return core.AddressWithMnemonic{
-		Address: addr,
+		Address:  addr,
 		Mnemonic: prv.GetMnemonic(),
 	}, nil
 
