@@ -103,7 +103,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("remote wallet new address error:%s", err)
 	}
-	log.Println("new address ", addr.String())
+	log.Println("new address ", addr.Address.String())
 	addrs, err := remoteWallet.WalletList(context.Background())
 	if err != nil {
 		log.Fatalf("remote wallet list addresses error:%s", err)
@@ -111,18 +111,18 @@ func main() {
 	for _, v := range addrs {
 		log.Println(v.String())
 	}
-	exist, err := remoteWallet.WalletHas(context.Background(), addr)
+	exist, err := remoteWallet.WalletHas(context.Background(), addr.Address)
 	if err != nil {
 		log.Fatalf("remote wallet check address exist error:%s", err)
 	}
-	log.Printf("addr:%s exist:%v", addr.String(), exist)
+	log.Printf("addr:%s exist:%v", addr.Address.String(), exist)
 	sh := sha256.New()
 	signData := sh.Sum(core.RandSignBytes)
-	sig, err := remoteWallet.WalletSign(context.Background(), addr, signData, core.MsgMeta{Type: core.MTVerifyAddress})
+	sig, err := remoteWallet.WalletSign(context.Background(), addr.Address, signData, core.MsgMeta{Type: core.MTVerifyAddress})
 	if err != nil {
 		log.Fatalf("wallet sign: %v", err)
 	}
-	err = crypto.Verify(sig, addr, signData)
+	err = crypto.Verify(sig, addr.Address, signData)
 	if err != nil {
 		log.Fatalf("verify signature: %v", err)
 	}

@@ -3,9 +3,10 @@ package crypto
 import (
 	"encoding/hex"
 	"fmt"
+	"testing"
+
 	"github.com/filecoin-project/venus-wallet/core"
 	"gotest.tools/assert"
-	"testing"
 )
 
 func TestSecpPrivateKey(t *testing.T) {
@@ -14,7 +15,7 @@ func TestSecpPrivateKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	prv, err := NewKeyFromData2(core.KTSecp256k1, key)
+	prv, err := NewKeyFromData2(core.KTSecp256k1, key, nil)
 	if err != nil {
 		t.Fatalf("load private key from bytes err:%s", err)
 	}
@@ -46,7 +47,7 @@ func TestBLSPrivateKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	prv, err := NewKeyFromData2(core.KTBLS, key)
+	prv, err := NewKeyFromData2(core.KTBLS, key, nil)
 	if err != nil {
 		t.Fatalf("load private key from bytes err:%s", err)
 	}
