@@ -9,12 +9,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
+	"io"
+
 	"github.com/filecoin-project/venus-wallet/core"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/sha3"
-	"hash"
-	"io"
 )
 
 var (
@@ -48,9 +49,10 @@ type CryptoJSON struct {
 }
 
 type EncryptedKey struct {
-	Address string       `json:"address"`
-	KeyType core.KeyType `json:"type"`
-	Crypto  *CryptoJSON  `json:"crypto"`
+	Address  string       `json:"address"`
+	KeyType  core.KeyType `json:"type"`
+	Crypto   *CryptoJSON  `json:"crypto"`
+	CryptoMn *CryptoJSON  `json:"crypto_mn"`
 }
 
 func getKDFKey(cryptoJSON *CryptoJSON, auth []byte) ([]byte, error) {

@@ -24,6 +24,7 @@ const (
 
 	SigTypeSecp256k1 = SigType(iota)
 	SigTypeBLS
+	SigTypeChiaBLS
 )
 
 var RandSignBytes []byte
@@ -50,6 +51,7 @@ type Cid = cid.Cid
 type KeyInfo struct {
 	Type       KeyType
 	PrivateKey []byte
+	Mnemonic   string
 }
 
 var (
@@ -91,6 +93,8 @@ func (kt *KeyType) UnmarshalJSON(bb []byte) error {
 			*kt = KTBLS
 		case crypto.SigTypeSecp256k1:
 			*kt = KTSecp256k1
+		case SigTypeChiaBLS:
+			*kt = KTCBLS
 		default:
 			return fmt.Errorf("unknown sigtype: %d", bst)
 		}
@@ -102,6 +106,7 @@ const (
 	KTUnknown   KeyType = "unknown"
 	KTBLS       KeyType = "bls"
 	KTSecp256k1 KeyType = "secp256k1"
+	KTCBLS      KeyType = "chiabls"
 )
 
 func KeyType2Sign(kt KeyType) SigType {
@@ -110,6 +115,8 @@ func KeyType2Sign(kt KeyType) SigType {
 		return SigTypeSecp256k1
 	case KTBLS:
 		return SigTypeBLS
+	case KTCBLS:
+		return SigTypeChiaBLS
 	default:
 		return SigTypeUnknown
 	}
@@ -121,7 +128,18 @@ func SignType2Key(kt SigType) KeyType {
 		return KTSecp256k1
 	case SigTypeBLS:
 		return KTBLS
+	case SigTypeChiaBLS:
+		return KTCBLS
 	default:
 		return KTUnknown
 	}
 }
+
+type AddressWithMnemonic struct {
+	Address  Address
+	Mnemonic string
+}
+
+var (
+	NilAddressWithMnemonic = AddressWithMnemonic{}
+)

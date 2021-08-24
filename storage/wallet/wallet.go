@@ -27,7 +27,7 @@ type ILocalWallet interface {
 
 // IWallet remote wallet api
 type IWallet interface {
-	WalletNew(ctx context.Context, kt core.KeyType) (core.Address, error)
+	WalletNew(ctx context.Context, kt core.KeyType, password string) (core.AddressWithMnemonic, error)
 	WalletHas(ctx context.Context, address core.Address) (bool, error)
 	WalletList(ctx context.Context) ([]core.Address, error)
 	WalletSign(ctx context.Context, signer core.Address, toSign []byte, meta core.MsgMeta) (*core.Signature, error)
@@ -103,33 +103,36 @@ func (w *wallet) LockState(ctx context.Context) bool {
 	return w.mw.LockState(ctx)
 }
 
-func (w *wallet) WalletNew(ctx context.Context, kt core.KeyType) (core.Address, error) {
+func (w *wallet) WalletNew(ctx context.Context, kt core.KeyType, password string) (core.AddressWithMnemonic, error) {
 	if err := w.mw.Next(); err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
 	err := w.mw.CheckToken(ctx)
 	if err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
-	prv, err := crypto.GeneratePrivateKey(core.KeyType2Sign(kt))
+	prv, err := crypto.GeneratePrivateKey(core.KeyType2Sign(kt), password)
 	if err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
 	addr, err := prv.Address()
 	if err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
 	ckey, err := w.mw.Encrypt(storage.EmptyPassword, prv)
 	if err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
 	err = w.ws.Put(ckey)
 	if err != nil {
-		return core.NilAddress, err
+		return core.NilAddressWithMnemonic, err
 	}
 	// notify
 	w.bus.Publish("wallet:add_address", addr)
-	return addr, nil
+	return core.AddressWithMnemonic{
+		Address: addr,
+		Mnemonic: prv.GetMnemonic(),
+	}, nil
 
 }
 

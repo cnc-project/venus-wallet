@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"fmt"
+
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/venus-wallet/core"
 	"golang.org/x/xerrors"
@@ -23,6 +24,8 @@ type PrivateKey interface {
 	KeyType() core.KeyType
 	// map to keyInfo
 	ToKeyInfo() *core.KeyInfo
+	// get mnemonic
+	GetMnemonic() string
 }
 
 func Verify(sig *core.Signature, addr core.Address, msg []byte) error {
@@ -37,38 +40,47 @@ func Verify(sig *core.Signature, addr core.Address, msg []byte) error {
 		return secpVerify(sig.Data, addr, msg)
 	case core.SigTypeBLS:
 		return blsVerify(sig.Data, addr, msg)
+	case core.SigTypeChiaBLS:
+		return blsChiaVerify(sig.Data, addr, msg)
 	default:
 		return xerrors.Errorf("cannot verify signature of unsupported type: %v", sig.Type)
 	}
 }
 
-func GeneratePrivateKey(st core.SigType) (PrivateKey, error) {
+func GeneratePrivateKey(st core.SigType, password string) (PrivateKey, error) {
 	switch st {
 	case core.SigTypeSecp256k1:
 		return genSecpPrivateKey()
 	case core.SigTypeBLS:
 		return genBlsPrivate()
+	case core.SigTypeChiaBLS:
+		return genChiaBlsPrivate(password)
 	default:
 		return nil, fmt.Errorf("invalid signature type: %d", st)
 	}
 }
+
 func NewKeyFromKeyInfo(ki *core.KeyInfo) (PrivateKey, error) {
 	switch ki.Type {
 	case core.KTBLS:
 		return newBlsKeyFromData(ki.PrivateKey)
 	case core.KTSecp256k1:
 		return newSecpKeyFromData(ki.PrivateKey), nil
+	case core.KTCBLS:
+		return newChiaBlsKeyFromData(ki.PrivateKey,ki.Mnemonic), nil
 	default:
 		return nil, fmt.Errorf("invalid key type: %s", ki.Type)
 	}
 }
 
-func NewKeyFromData2(kt core.KeyType, prv []byte) (PrivateKey, error) {
+func NewKeyFromData2(kt core.KeyType, prv []byte,mnemonicBytes []byte) (PrivateKey, error) {
 	switch kt {
 	case core.KTBLS:
 		return newBlsKeyFromData(prv)
 	case core.KTSecp256k1:
 		return newSecpKeyFromData(prv), nil
+	case core.KTCBLS:
+		return newChiaBlsKeyFromData(prv,string(mnemonicBytes)), nil
 	default:
 		return nil, fmt.Errorf("invalid key type: %s", kt)
 	}
@@ -80,6 +92,9 @@ func NewKeyFromData(st core.SigType, prv []byte) (PrivateKey, error) {
 		return newSecpKeyFromData(prv), nil
 	case core.SigTypeBLS:
 		return newBlsKeyFromData(prv)
+	case core.SigTypeChiaBLS:
+		// TODO：need mnemonic
+		return newChiaBlsKeyFromData(prv,""), nil
 	default:
 		return nil, fmt.Errorf("invalid signature type: %d", st)
 	}

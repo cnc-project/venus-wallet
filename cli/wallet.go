@@ -120,23 +120,35 @@ var walletLockState = &cli.Command{
 var walletNew = &cli.Command{
 	Name:      "new",
 	Usage:     "Generate a new key of the given type",
-	ArgsUsage: "[bls|secp256k1 (default secp256k1)]",
+	ArgsUsage: "[bls (default bls)]",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "password",
+			Usage: "specify password for mnemonic",
+			Value: "",
+		},
+	},
 	Action: func(cctx *cli.Context) error {
 		t := core.KeyType(cctx.Args().First())
 		if t == "" {
-			t = core.KTSecp256k1
+			t = core.KTCBLS
 		}
 		api, closer, err := helper.GetFullAPI(cctx)
 		if err != nil {
 			return err
 		}
+		// TODO 生成助记符 如果有密码 则加上密码
+		// gen mnemonic
+		// seed
 		ctx := helper.ReqContext(cctx)
 		defer closer()
-		nk, err := api.WalletNew(ctx, t)
+		pwd := cctx.String("msg-type")
+		nk, err := api.WalletNew(ctx, t, pwd)
 		if err != nil {
 			return err
 		}
-		fmt.Println(nk.String())
+		fmt.Println("addr:", nk.Address.String())
+		fmt.Println("mnemonic:", nk.Mnemonic)
 		return nil
 	},
 }

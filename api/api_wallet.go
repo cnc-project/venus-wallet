@@ -12,7 +12,7 @@ var _ wallet.IWallet = &WalletAPIAdapter{}
 // wallet API permissions constraints
 type WalletAPIAdapter struct {
 	Internal struct {
-		WalletNew    func(ctx context.Context, kt core.KeyType) (core.Address, error)                                          `perm:"admin"`
+		WalletNew    func(ctx context.Context, kt core.KeyType, password string) (core.AddressWithMnemonic, error)                         `perm:"admin"`
 		WalletHas    func(ctx context.Context, address core.Address) (bool, error)                                             `perm:"read"`
 		WalletList   func(ctx context.Context) ([]core.Address, error)                                                         `perm:"read"`
 		WalletSign   func(ctx context.Context, signer core.Address, toSign []byte, meta core.MsgMeta) (*core.Signature, error) `perm:"sign"`
@@ -22,8 +22,8 @@ type WalletAPIAdapter struct {
 	}
 }
 
-func (c *WalletAPIAdapter) WalletNew(ctx context.Context, keyType core.KeyType) (core.Address, error) {
-	return c.Internal.WalletNew(ctx, keyType)
+func (c *WalletAPIAdapter) WalletNew(ctx context.Context, keyType core.KeyType, password string) (core.AddressWithMnemonic, error) {
+	return c.Internal.WalletNew(ctx, keyType, password)
 }
 
 func (c *WalletAPIAdapter) WalletHas(ctx context.Context, addr core.Address) (bool, error) {

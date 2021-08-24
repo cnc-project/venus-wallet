@@ -67,6 +67,10 @@ func (p *secpPrivateKey) ToKeyInfo() *core.KeyInfo {
 		Type:       core.KTSecp256k1,
 	}
 }
+func (p *secpPrivateKey) GetMnemonic() string {
+	return ""
+}
+
 func secpVerify(sig []byte, a core.Address, msg []byte) error {
 	b2sum := blake2b.Sum256(msg)
 	pubk, err := crypto.EcRecover(b2sum[:], sig)

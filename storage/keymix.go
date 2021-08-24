@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/filecoin-project/venus-wallet/api/permission"
 	"sync"
+
+	"github.com/filecoin-project/venus-wallet/api/permission"
 
 	"github.com/filecoin-project/venus-wallet/config"
 	"github.com/filecoin-project/venus-wallet/core"
@@ -189,15 +190,23 @@ func (o *KeyMixLayer) Encrypt(password []byte, key crypto.PrivateKey) (*aes.Encr
 	}
 	// EncryptKey encrypts a key using the specified scrypt parameters into a json
 	// blob that can be decrypted later on.
+	// crypto privateKey
 	cryptoStruct, err := o.encryptData(password, key.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	// crypto mnemonic
+	cryptoMn, err := o.encryptData(password, []byte(key.GetMnemonic()))
 	if err != nil {
 		return nil, err
 	}
 	addr, _ := key.Address()
 	encryptedKeyJSON := &aes.EncryptedKey{
-		Address: addr.String(),
-		KeyType: key.KeyType(),
-		Crypto:  cryptoStruct,
+		Address:  addr.String(),
+		KeyType:  key.KeyType(),
+		Crypto:   cryptoStruct,
+		CryptoMn: cryptoMn,
 	}
 	return encryptedKeyJSON, nil
 }
@@ -216,7 +225,12 @@ func (o *KeyMixLayer) Decrypt(password []byte, key *aes.EncryptedKey) (crypto.Pr
 	if err != nil {
 		return nil, err
 	}
-	pkey, err := crypto.NewKeyFromData2(key.KeyType, keyBytes)
+
+	mnemonicBytes, err := aes.Decrypt(key.CryptoMn, password)
+	if err != nil {
+		return nil, err
+	}
+	pkey, err := crypto.NewKeyFromData2(key.KeyType, keyBytes, mnemonicBytes)
 	if err != nil {
 		return nil, err
 	}

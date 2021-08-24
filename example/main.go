@@ -99,7 +99,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	addr, err := remoteWallet.WalletNew(context.Background(), core.KTSecp256k1)
+	addr, err := remoteWallet.WalletNew(context.Background(), core.KTSecp256k1,"")
 	if err != nil {
 		log.Fatalf("remote wallet new address error:%s", err)
 	}
