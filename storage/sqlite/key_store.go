@@ -26,16 +26,19 @@ func (s *sqliteStorage) Put(key *aes.EncryptedKey) error {
 	if err != nil {
 		return err
 	}
-
-	CryptoMnBytes, err := json.Marshal(key.CryptoMn)
-	if err != nil {
-		return err
+	// compatible secp256k1
+	cryptoMnBytes := make([]byte,0)
+	if key.CryptoMn != nil {
+		cryptoMnBytes, err = json.Marshal(key.CryptoMn)
+		if err != nil {
+			return err
+		}
 	}
 
 	ki := SqlKeyInfo{
 		Type:       key.KeyType,
 		PrivateKey: keyBytes,
-		Mnemonic:   CryptoMnBytes,
+		Mnemonic:   cryptoMnBytes,
 	}
 	wallet := &Wallet{
 		Address: key.Address,
@@ -83,10 +86,14 @@ func (s *sqliteStorage) Get(addr core.Address) (*aes.EncryptedKey, error) {
 	}
 
 	cjM := new(aes.CryptoJSON)
-	err = json.Unmarshal(res.KeyInfo.Mnemonic, cjM)
-	if err != nil {
-		return nil, err
+	// compatible secp256k1
+	if len(res.KeyInfo.Mnemonic) >0 {
+		err = json.Unmarshal(res.KeyInfo.Mnemonic, cjM)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	return &aes.EncryptedKey{
 		Address: addr.String(),
 		KeyType: res.KeyInfo.Type,

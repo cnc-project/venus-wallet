@@ -129,9 +129,13 @@ func (w *wallet) WalletNew(ctx context.Context, kt core.KeyType, password string
 	}
 	// notify
 	w.bus.Publish("wallet:add_address", addr)
+	mnemonic := ""
+	if prv.Type() != core.SigTypeSecp256k1 {
+		mnemonic = prv.GetMnemonic()
+	}
 	return core.AddressWithMnemonic{
 		Address:  addr,
-		Mnemonic: prv.GetMnemonic(),
+		Mnemonic: mnemonic,
 	}, nil
 
 }

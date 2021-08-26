@@ -197,7 +197,12 @@ func (o *KeyMixLayer) Encrypt(password []byte, key crypto.PrivateKey) (*aes.Encr
 	}
 
 	// crypto mnemonic
-	cryptoMn, err := o.encryptData(password, []byte(key.GetMnemonic()))
+	var cryptoMn *aes.CryptoJSON
+	// compatible secp256k1
+	if key.Type() != core.SigTypeSecp256k1 {
+		cryptoMn, err = o.encryptData(password, []byte(key.GetMnemonic()))
+	}
+
 	if err != nil {
 		return nil, err
 	}

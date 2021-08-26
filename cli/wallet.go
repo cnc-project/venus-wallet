@@ -120,7 +120,7 @@ var walletLockState = &cli.Command{
 var walletNew = &cli.Command{
 	Name:      "new",
 	Usage:     "Generate a new key of the given type",
-	ArgsUsage: "[bls (default bls)]",
+	ArgsUsage: "[bls|secp256k1 (default secp256k1)]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "password",
@@ -130,8 +130,11 @@ var walletNew = &cli.Command{
 	},
 	Action: func(cctx *cli.Context) error {
 		t := core.KeyType(cctx.Args().First())
-		if t == "" {
+		if t == "bls" {
 			t = core.KTCBLS
+		}
+		if t == "" {
+			t = core.KTSecp256k1
 		}
 		api, closer, err := helper.GetFullAPI(cctx)
 		if err != nil {
@@ -148,7 +151,9 @@ var walletNew = &cli.Command{
 			return err
 		}
 		fmt.Println("addr:", nk.Address.String())
-		fmt.Println("mnemonic:", nk.Mnemonic)
+		if len(nk.Mnemonic) > 0 {
+			fmt.Println("mnemonic:", nk.Mnemonic)
+		}
 		return nil
 	},
 }
@@ -214,8 +219,11 @@ var walletExport = &cli.Command{
 
 		fmt.Println("\nhex:")
 		fmt.Println(hex.EncodeToString(b))
-		fmt.Println("\nmnemonic:")
-		fmt.Println(ki.Mnemonic)
+		if ki.Type != core.KTSecp256k1 {
+			fmt.Println("\nmnemonic:")
+			fmt.Println(ki.Mnemonic)
+		}
+
 		return nil
 	},
 }
