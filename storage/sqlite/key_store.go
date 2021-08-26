@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"encoding/json"
+
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/venus-wallet/core"
 	"github.com/filecoin-project/venus-wallet/crypto/aes"
@@ -25,9 +26,16 @@ func (s *sqliteStorage) Put(key *aes.EncryptedKey) error {
 	if err != nil {
 		return err
 	}
+
+	CryptoMnBytes, err := json.Marshal(key.CryptoMn)
+	if err != nil {
+		return err
+	}
+
 	ki := SqlKeyInfo{
 		Type:       key.KeyType,
 		PrivateKey: keyBytes,
+		Mnemonic:   CryptoMnBytes,
 	}
 	wallet := &Wallet{
 		Address: key.Address,
@@ -73,10 +81,17 @@ func (s *sqliteStorage) Get(addr core.Address) (*aes.EncryptedKey, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	cjM := new(aes.CryptoJSON)
+	err = json.Unmarshal(res.KeyInfo.Mnemonic, cjM)
+	if err != nil {
+		return nil, err
+	}
 	return &aes.EncryptedKey{
 		Address: addr.String(),
 		KeyType: res.KeyInfo.Type,
 		Crypto:  cj,
+		CryptoMn: cjM,
 	}, nil
 }
 

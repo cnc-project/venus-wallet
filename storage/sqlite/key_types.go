@@ -31,11 +31,16 @@ func (w *Wallet) TableName() string {
 	return TBWallet
 }
 
-type SqlKeyInfo core.KeyInfo
+type SqlKeyInfo struct {
+	Type       core.KeyType
+	PrivateKey []byte
+	Mnemonic   []byte
+}
 
 func (mki *SqlKeyInfo) IsValid() bool {
 	return mki != nil &&
 		(mki.Type == core.KTBLS ||
+			mki.Type == core.KTCBLS ||
 			mki.Type == core.KTSecp256k1) &&
 		len(mki.PrivateKey) != 0
 }
