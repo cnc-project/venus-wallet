@@ -212,7 +212,10 @@ var walletExport = &cli.Command{
 			return err
 		}
 
+		fmt.Println("\nhex:")
 		fmt.Println(hex.EncodeToString(b))
+		fmt.Println("\nmnemonic:")
+		fmt.Println(ki.Mnemonic)
 		return nil
 	},
 }
