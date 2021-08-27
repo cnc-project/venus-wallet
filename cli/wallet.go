@@ -244,8 +244,7 @@ var walletImportMnemonic = &cli.Command{
 			if err != nil {
 				return err
 			}
-			inpdata = mnemonic
-			inpdata = inpdata[:len(inpdata)-1]
+			inpdata = mnemonic[:len(mnemonic)-1]
 		}
 
 		if !crypto.CheckMnemonic(string(inpdata)) {
