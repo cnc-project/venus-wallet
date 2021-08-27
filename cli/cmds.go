@@ -12,6 +12,7 @@ var Commands = []*cli.Command{
 	walletNew,
 	walletList,
 	walletExport,
+	walletImportMnemonic,
 	walletImport,
 	walletSign,
 	walletDel,

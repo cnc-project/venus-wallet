@@ -28,7 +28,7 @@ func genChiaBlsPrivate(password string) (PrivateKey, error) {
 // notes ：Forget the mnemonic words can be imported in this way, but the mnemonic words will not be deduced based on private
 func newChiaBlsKeyFromData(data []byte, mnemonic string) PrivateKey {
 	if cb.CheckMnemonic(mnemonic) {
-		pk, _ := genChiaBlsWithMnemonic(mnemonic, "")
+		pk, _ := GenChiaBlsWithMnemonic(mnemonic, "")
 		return pk
 	}
 
@@ -41,7 +41,7 @@ func newChiaBlsKeyFromData(data []byte, mnemonic string) PrivateKey {
 }
 
 // generate privateKey based on mnemonic
-func genChiaBlsWithMnemonic(mnemonic, password string) (PrivateKey, error) {
+func GenChiaBlsWithMnemonic(mnemonic, password string) (PrivateKey, error) {
 	pk := cb.KeyGenWithMnemonic(mnemonic, password)
 	return &blsChiaPrivate{
 		key:      pk,

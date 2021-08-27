@@ -14,6 +14,7 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/venus-wallet/cli/helper"
 	"github.com/filecoin-project/venus-wallet/core"
+	"github.com/filecoin-project/venus-wallet/crypto"
 	"github.com/filecoin-project/venus-wallet/errcode"
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli/v2"
@@ -224,6 +225,52 @@ var walletExport = &cli.Command{
 			fmt.Println(ki.Mnemonic)
 		}
 
+		return nil
+	},
+}
+
+var walletImportMnemonic = &cli.Command{
+	Name:  "import_mnemonic",
+	Usage: "import mnemonic",
+	Action: func(cctx *cli.Context) error {
+		var inpdata []byte
+		if cctx.Args().Present() {
+			mnemonic := cctx.Args().Slice()
+			inpdata = []byte(strings.Join(mnemonic, "\x20"))
+		} else {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print("Enter mnemonic: ")
+			mnemonic, err := reader.ReadBytes('\n')
+			if err != nil {
+				return err
+			}
+			inpdata = mnemonic
+			inpdata = inpdata[:len(inpdata)-1]
+		}
+
+		if !crypto.CheckMnemonic(string(inpdata)) {
+			fmt.Println("Invalid mnemonic!")
+		} else {
+			pwd := cctx.String("password")
+			PrivateKey, _ := crypto.GenChiaBlsWithMnemonic(string(inpdata), pwd)
+
+			var ki core.KeyInfo
+			ki.Type = core.KTCBLS
+			ki.PrivateKey = PrivateKey.Bytes()
+			ki.Mnemonic = string(inpdata)
+
+			api, closer, err := helper.GetFullAPI(cctx)
+			if err != nil {
+				return err
+			}
+			defer closer()
+			ctx := helper.ReqContext(cctx)
+			addr, err := api.WalletImport(ctx, &ki)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("imported key %s successfully!\n", addr)
+		}
 		return nil
 	},
 }
