@@ -231,15 +231,24 @@ func (o *KeyMixLayer) Decrypt(password []byte, key *aes.EncryptedKey) (crypto.Pr
 		return nil, err
 	}
 
-	mnemonicBytes, err := aes.Decrypt(key.CryptoMn, password)
-	if err != nil {
-		return nil, err
+	var mnemonicBytes []byte
+	if key.KeyType == core.KTCBLS {
+		mnemonicBytes, err = aes.Decrypt(key.CryptoMn, password)
+		if err != nil {
+			return nil, err
+		}
+		pkey, err := crypto.NewKeyFromData2(key.KeyType, keyBytes, mnemonicBytes)
+		if err != nil {
+			return nil, err
+		}
+		return pkey, nil
+	} else {
+		pkey, err := crypto.NewKeyFromData2(key.KeyType, keyBytes, mnemonicBytes)
+		if err != nil {
+			return nil, err
+		}
+		return pkey, nil
 	}
-	pkey, err := crypto.NewKeyFromData2(key.KeyType, keyBytes, mnemonicBytes)
-	if err != nil {
-		return nil, err
-	}
-	return pkey, nil
 }
 
 func (o *KeyMixLayer) VerifyPassword(_ context.Context, password string) error {
